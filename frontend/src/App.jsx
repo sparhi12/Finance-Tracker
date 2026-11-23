@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import AddAccountModal from './components/AddAccountModal';
 import DashboardView from './pages/DashboardView';
-import DataEntryView from './pages/DataEntryView';
+import DataInputView from './pages/DataInputView';
 import AccountsView from './pages/AccountsView';
-import TransactionsView from './pages/TransactionsView';
 import BackupsView from './pages/BackupsView';
 import { api } from './services/api';
 
@@ -17,6 +16,7 @@ export default function App() {
     startDate: '',
     endDate: new Date().toISOString().split('T')[0]
   });
+  const [selectedInputAccountId, setSelectedInputAccountId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshingPrices, setRefreshingPrices] = useState(false);
   const [isAddAccountOpen, setIsAddAccountOpen] = useState(false);
@@ -58,8 +58,15 @@ export default function App() {
   };
 
   const handleAccountCreated = async (accountPayload) => {
-    await api.createAccount(accountPayload);
+    const created = await api.createAccount(accountPayload);
     await loadData(selectedRange, customDates);
+    setSelectedInputAccountId(created.id);
+    setActiveTab('data-input');
+  };
+
+  const handleNavigateToAccount = (accountId) => {
+    setSelectedInputAccountId(accountId);
+    setActiveTab('data-input');
   };
 
   return (
@@ -84,13 +91,17 @@ export default function App() {
             onRangeChange={setSelectedRange}
             customDates={customDates}
             onCustomDatesChange={setCustomDates}
+            onNavigateToAccount={handleNavigateToAccount}
             loading={loading}
           />
         )}
 
-        {activeTab === 'data-entry' && (
-          <DataEntryView
+        {activeTab === 'data-input' && (
+          <DataInputView
+            accounts={accounts}
+            initialAccountId={selectedInputAccountId}
             onDataUpdated={() => loadData(selectedRange, customDates)}
+            onOpenAddAccount={() => setIsAddAccountOpen(true)}
           />
         )}
 
@@ -101,14 +112,10 @@ export default function App() {
           />
         )}
 
-        {activeTab === 'transactions' && (
-          <TransactionsView
-            accounts={accounts}
-          />
-        )}
-
         {activeTab === 'backups' && (
-          <BackupsView />
+          <BackupsView 
+            onResetData={() => loadData(selectedRange, customDates)}
+          />
         )}
       </main>
 
@@ -122,7 +129,7 @@ export default function App() {
       {/* Footer */}
       <footer className="border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>Simplifi Local • Offline-First Personal Finance Tracker</span>
+          <span>Finance Tracker • Local-First Personal Finance</span>
           <span className="font-mono text-[11px] text-slate-400">Database: D:\finance\finance.db</span>
         </div>
       </footer>

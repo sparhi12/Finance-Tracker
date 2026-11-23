@@ -34,6 +34,8 @@ export const api = {
     request(`/accounts/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteAccount: (id) =>
     request(`/accounts/${id}`, { method: 'DELETE' }),
+  resetAllData: () =>
+    request('/accounts/reset-data', { method: 'POST' }),
 
   // Snapshots & Review Template
   getReviewTemplate: () =>

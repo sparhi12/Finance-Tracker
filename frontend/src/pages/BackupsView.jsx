@@ -12,10 +12,11 @@ import {
 } from 'lucide-react';
 import { api } from '../services/api';
 
-export default function BackupsView() {
+export default function BackupsView({ onResetData }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
@@ -48,6 +49,28 @@ export default function BackupsView() {
       setError(err.message || 'Failed to create backup');
     } finally {
       setCreating(false);
+    }
+  };
+
+  const handleResetAllData = async () => {
+    const confirmed = window.confirm(
+      "WARNING: This will permanently delete all accounts, snapshots, and transactions from D:\\finance\\finance.db so you can start with a fresh, clean database.\n\nA backup snapshot will be saved automatically first.\n\nAre you sure you want to clear all data?"
+    );
+    if (!confirmed) return;
+
+    setResetting(true);
+    setMessage('');
+    setError('');
+    try {
+      const res = await api.resetAllData();
+      setMessage(res.message || 'Database reset successfully. Starting fresh!');
+      loadBackups();
+      if (onResetData) onResetData();
+      setTimeout(() => setMessage(''), 5000);
+    } catch (err) {
+      setError(err.message || 'Failed to reset database');
+    } finally {
+      setResetting(false);
     }
   };
 
@@ -123,7 +146,7 @@ export default function BackupsView() {
             {data?.backup_dir || 'D:\\finance\\backups'}
           </div>
           <p className="text-[11px] text-slate-400">
-            Snapshots triggered before write operations & CSV imports
+            Snapshots triggered once a month or on-demand
           </p>
         </div>
 
@@ -134,10 +157,10 @@ export default function BackupsView() {
             <span>Retention Policy</span>
           </div>
           <div className="text-sm font-bold text-slate-900 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
-            Retain last {data?.max_backups || 30} snapshots
+            Monthly snapshots (last {data?.max_backups || 12} retained)
           </div>
           <p className="text-[11px] text-slate-400">
-            Older snapshots beyond the threshold are automatically pruned
+            Conserves storage space by only taking automated snapshots once a month
           </p>
         </div>
 
@@ -191,6 +214,25 @@ export default function BackupsView() {
               )}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* Danger Zone: Clear Demo Data / Reset DB */}
+      <div className="bg-white rounded-xl border border-rose-200 shadow-sm p-6 space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 className="font-bold text-rose-900 text-sm">Database Maintenance & Reset</h3>
+            <p className="text-xs text-slate-500">
+              Clear out demo/sample accounts and start fresh with an empty database. A backup will be created automatically before clearing.
+            </p>
+          </div>
+          <button
+            onClick={handleResetAllData}
+            disabled={resetting}
+            className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold shadow-sm transition disabled:opacity-50 whitespace-nowrap"
+          >
+            {resetting ? 'Resetting...' : 'Clear All Demo Data'}
+          </button>
         </div>
       </div>
 

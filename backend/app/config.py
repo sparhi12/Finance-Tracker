@@ -32,7 +32,7 @@ def get_storage_paths():
     return db_path, backup_dir
 
 DB_PATH, BACKUP_DIR = get_storage_paths()
-MAX_BACKUPS = int(os.getenv("MAX_BACKUPS", "30"))
+MAX_BACKUPS = int(os.getenv("MAX_BACKUPS", "12"))
 
 CORS_ORIGINS = [
     "http://localhost:5173",

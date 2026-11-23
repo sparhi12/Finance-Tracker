@@ -29,9 +29,8 @@ export default function Navbar({
 
   const navItems = [
     { id: 'dashboard', label: 'Net Worth', icon: TrendingUp },
-    { id: 'data-entry', label: 'Data Entry', icon: Wallet },
+    { id: 'data-input', label: 'Data Input', icon: Wallet },
     { id: 'accounts', label: 'Accounts', icon: Layers },
-    { id: 'transactions', label: 'Transactions', icon: Receipt },
     { id: 'backups', label: 'Backups & Storage', icon: Database },
   ];
 
@@ -52,7 +51,7 @@ export default function Navbar({
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <span className="font-bold text-slate-900 text-lg tracking-tight">Simplifi</span>
+                <span className="font-bold text-slate-900 text-lg tracking-tight">Finance Tracker</span>
                 <span className="text-xs uppercase tracking-wider font-semibold px-2 py-0.5 bg-teal-50 text-teal-700 rounded-full border border-teal-200">
                   Local
                 </span>

@@ -1,7 +1,7 @@
 @echo off
-title Simplifi Local - Personal Finance Tracker
+title Finance Tracker
 echo ============================================================
-echo   Simplifi Local - Personal Finance & Net Worth Tracker
+echo   Finance Tracker - Local-First Net Worth Tracker
 echo ============================================================
 echo.
 
@@ -27,10 +27,10 @@ if not exist "frontend\node_modules" (
 
 echo.
 echo [1/2] Starting FastAPI Backend on http://localhost:8000 ...
-start "Simplifi Backend (FastAPI)" cmd /k "cd /d "%REPO_DIR%backend" && call venv\Scripts\activate && uvicorn main:app --reload --host 0.0.0.0 --port 8000"
+start "Finance Tracker Backend" cmd /k "cd /d "%REPO_DIR%backend" && call venv\Scripts\activate && uvicorn main:app --reload --host 0.0.0.0 --port 8000"
 
 echo [2/2] Starting React + Vite Frontend on http://localhost:5173 ...
-start "Simplifi Frontend (Vite)" cmd /k "cd /d "%REPO_DIR%frontend" && npm run dev -- --host 0.0.0.0"
+start "Finance Tracker Frontend" cmd /k "cd /d "%REPO_DIR%frontend" && npm run dev -- --host 0.0.0.0"
 
 echo.
 echo Waiting for servers to initialize...

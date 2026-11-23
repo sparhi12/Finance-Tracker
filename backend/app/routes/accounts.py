@@ -155,3 +155,18 @@ def delete_account(account_id: int):
             raise HTTPException(status_code=404, detail="Account not found")
         conn.execute("DELETE FROM accounts WHERE id = ?", (account_id,))
     return {"message": "Account deleted successfully", "id": account_id}
+
+@router.post("/reset-data")
+def reset_all_data():
+    """
+    Clears all accounts, snapshots, holdings, and transactions so user can start fresh.
+    Always creates a forced backup first.
+    """
+    from app.backup_service import create_backup
+    create_backup(force=True)
+    with get_db(is_write=True) as conn:
+        conn.execute("DELETE FROM transactions;")
+        conn.execute("DELETE FROM balance_snapshots;")
+        conn.execute("DELETE FROM brokerage_holdings;")
+        conn.execute("DELETE FROM accounts;")
+    return {"message": "All data has been cleared. Database is fresh and ready for your accounts."}

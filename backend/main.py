@@ -24,7 +24,7 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(
-    title="Local-First Personal Finance & Net Worth Tracker",
+    title="Finance Tracker",
     description="Offline-capable local-first finance manager with daily time-series reconstruction",
     version="1.0.0",
     lifespan=lifespan

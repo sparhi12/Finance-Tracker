@@ -1,7 +1,7 @@
 @echo off
-title Simplifi Local - Update Workflow
+title Finance Tracker - Update Workflow
 echo ============================================================
-echo   Simplifi Local - Updating Application & Dependencies
+echo   Finance Tracker - Updating Application & Dependencies
 echo ============================================================
 echo.
 

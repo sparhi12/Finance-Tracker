@@ -1,6 +1,6 @@
-# Local-First Personal Finance & Net Worth Tracker
+# Finance Tracker
 
-A clean, responsive, local-first and offline-capable personal finance web application inspired by Quicken Simplifi. Runs locally on Windows (`localhost`), persists data to a secondary drive (`D:\finance\`), and can later be deployed to a Linux VM for mobile access without rewriting the frontend or API.
+A clean, responsive, local-first and offline-capable personal finance web application. Runs locally on Windows (`localhost`), persists data to a secondary drive (`D:\finance\`), and can later be deployed to a Linux VM for mobile access without rewriting the frontend or API.
 
 ---
 

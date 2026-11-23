@@ -6,37 +6,41 @@ from pathlib import Path
 from typing import List, Dict, Optional
 from app.config import DB_PATH, BACKUP_DIR, MAX_BACKUPS
 
-_last_backup_time = 0.0
-
-def create_backup(force: bool = False, min_interval_seconds: float = 2.0) -> Optional[str]:
+def should_run_monthly_backup() -> bool:
     """
-    Creates an automatic backup of the SQLite database before write operations.
-    Retains the last MAX_BACKUPS (default 30).
+    Checks if a backup has already been created for the current calendar month (YYYY-MM).
     """
-    global _last_backup_time
-    now_ts = time.time()
+    if not BACKUP_DIR.exists():
+        return True
+    current_month_prefix = datetime.now().strftime("finance_%Y-%m")
+    existing_month_backups = list(BACKUP_DIR.glob(f"{current_month_prefix}*.db"))
+    return len(existing_month_backups) == 0
 
-    # Skip if less than min_interval_seconds has elapsed, unless forced
-    if not force and (now_ts - _last_backup_time < min_interval_seconds):
-        return None
-
+def create_backup(force: bool = False) -> Optional[str]:
+    """
+    Creates an automatic backup of the SQLite database at most once per calendar month.
+    Manual / forced backups bypass the monthly limit.
+    Retains the last MAX_BACKUPS (default 12 monthly snapshots).
+    """
     if not DB_PATH.exists() or DB_PATH.stat().st_size == 0:
         return None
 
-    BACKUP_DIR.mkdir(parents=True, exist_ok=True)
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
-    backup_filename = f"finance_{timestamp}.db"
-    backup_file = BACKUP_DIR / backup_filename
+    # Only create automatic backup if no backup exists yet for this month
+    if not force and not should_run_monthly_backup():
+        return None
 
-    # If file with same timestamp exists (rapid calls in same second), append a millisecond suffix
-    if backup_file.exists():
-        ms = int(datetime.now().microsecond / 1000)
-        backup_filename = f"finance_{timestamp}_{ms:03d}.db"
-        backup_file = BACKUP_DIR / backup_filename
+    BACKUP_DIR.mkdir(parents=True, exist_ok=True)
+    if force:
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        backup_filename = f"finance_{timestamp}_manual.db"
+    else:
+        month_str = datetime.now().strftime("%Y-%m")
+        backup_filename = f"finance_{month_str}.db"
+
+    backup_file = BACKUP_DIR / backup_filename
 
     try:
         shutil.copy2(DB_PATH, backup_file)
-        _last_backup_time = now_ts
         cleanup_old_backups()
         return str(backup_file)
     except Exception as e:
@@ -45,7 +49,7 @@ def create_backup(force: bool = False, min_interval_seconds: float = 2.0) -> Opt
 
 def cleanup_old_backups(keep_count: int = MAX_BACKUPS):
     """
-    Enforces backup retention policy, keeping the last `keep_count` backups.
+    Enforces backup retention policy, keeping the last `keep_count` backups (default 12 months).
     """
     try:
         if not BACKUP_DIR.exists():
