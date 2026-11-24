@@ -1,0 +1,17 @@
+[Unit]
+Description=Finance Tracker - Local-First Net Worth Manager
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/finance-tracker
+ExecStart=/opt/finance-tracker/venv/bin/python /opt/finance-tracker/run.py
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+Environment=DB_PATH=/opt/finance-tracker/data/finance.db
+Environment=BACKUP_DIR=/opt/finance-tracker/data/backups
+
+[Install]
+WantedBy=multi-user.target
