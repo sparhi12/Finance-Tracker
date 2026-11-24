@@ -121,3 +121,16 @@ def startup_price_sync():
         fetch_and_cache_ticker_prices(tickers)
     else:
         print("[Startup Price Sync] No active equity tickers found.")
+
+def lookup_cached_price(ticker: str, target_date_str: Optional[str] = None) -> float:
+    """
+    Helper to look up a forward-filled cached price for a single ticker.
+    """
+    if not ticker or ticker.upper() == "CASH":
+        return 1.0
+    from app.engine import get_price_map, lookup_forward_filled_price
+    t = ticker.upper()
+    target_date = target_date_str or datetime.date.today().isoformat()
+    pmap = get_price_map([t], target_date)
+    return lookup_forward_filled_price(t, target_date, pmap.get(t, {}))
+
