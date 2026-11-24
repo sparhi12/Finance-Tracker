@@ -1,13 +1,14 @@
-# Finance Tracker
+# 💰 Finance Tracker
 
-A clean, responsive, local-first and offline-capable personal finance web application. Runs locally on Windows (`localhost`), persists data to a secondary drive (`D:\finance\`), and can later be deployed to a Linux VM for mobile access without rewriting the frontend or API.
+A clean, responsive, 100% Python local-first and offline-capable personal finance tracker. Built with **Streamlit**, **Plotly**, and **SQLite with WAL mode**. Persists data locally (`D:\finance\` with automatic fallback to `./data/`), runs with zero cloud dependency, and requires **no Node.js or JavaScript build tools**.
 
 ---
 
 ## 🌟 Highlights & Architecture
 
+- **100% Pure Python Stack:** No Node.js, no npm, no JavaScript build pipeline. The frontend is written in Streamlit with interactive Plotly charts, running seamlessly with the backend Python engine in a single process.
 - **Local-First & Offline Capable:** Runs 100% locally on your machine with zero cloud dependency.
-- **SQLite with WAL Mode (`D:\finance\finance.db`):** High-concurrency Write-Ahead Logging mode enabled. Auto-creates directories on first launch.
+- **SQLite with WAL Mode (`D:\finance\finance.db` or `./data/finance.db`):** High-concurrency Write-Ahead Logging mode enabled. Auto-creates directories on first launch.
 - **Automated Pre-Write Snapshots:** Automatically triggers database backups before mutating writes and CSV imports (`D:\finance\backups\finance_YYYY-MM-DD_HHMMSS.db`), retaining the last 30 backups with automatic pruning.
 - **Cadence-Agnostic Time-Series Engine:** Forward-fills account balances and equity holdings across any date interval (`1M`, `3M`, `YTD`, `1Y`, `ALL`, or custom date ranges), with weekend and holiday market forward-filling.
 - **Mathematical Period Change Attribution:** Exact decomposition of net worth movement into:
@@ -16,64 +17,69 @@ A clean, responsive, local-first and offline-capable personal finance web applic
   - **Cash Balance Changes** ($\Delta \text{Cash}$)
   - **Credit Debt Changes** ($\Delta \text{Credit}$)
 - **Frictionless Data Entry:** Review template pre-filled with your latest known account balances and ticker share counts. Defaults to today's date with editable date pickers.
-- **Quicken Simplifi Responsive Design:** Desktop-first layout with collapsible/responsive controls that adapt cleanly to tablets and mobile devices.
+- **Bank CSV Statement Import:** Upload and parse bank/credit card CSV exports directly into your local database.
 
 ---
 
-## 🚀 Quick Start (Windows)
+## 🚀 Easy Access & One-Click Launch
 
-### 1. Fast Start
-Double-click `start.bat` in the repository root or run:
-```cmd
-start.bat
-```
-This automatically initializes the Python virtual environment, installs npm dependencies, starts the FastAPI backend (`http://localhost:8000`), starts the Vite frontend (`http://localhost:5173`), and opens your browser.
+### Option 1: Create a Desktop Icon (Easiest & Recommended)
 
-### 2. Fast Update
-To pull the latest Git changes and update dependencies:
-```cmd
-update.bat
-```
+#### Windows
+1. Double-click `create_desktop_shortcut.bat` in the project folder.
+2. A **Finance Tracker** shortcut with an icon will appear on your Desktop!
+3. Double-click that desktop icon anytime to start the app and open your browser automatically.
+
+#### macOS / Linux
+1. Run `./create_desktop_shortcut.sh` in the terminal:
+   ```bash
+   ./create_desktop_shortcut.sh
+   ```
+2. A **Finance Tracker.command** launcher will appear on your Desktop! Double-click it anytime.
 
 ---
 
-## ⚙️ Manual Setup & Development
+### Option 2: Run Directly from Folder
 
-### Backend (Python 3.11+)
+#### Windows
+Double-click `run.bat` (or `start.bat`) in the project root.
+- It will automatically set up the Python virtual environment, install requirements if needed, launch the app, and open your browser.
+
+#### macOS / Linux
+Run:
 ```bash
-# Navigate to backend directory
-cd backend
+./run.sh
+```
 
-# Create virtual environment
+#### Any OS (Manual Python Command)
+```bash
+# 1. (Optional) Activate virtual environment
 python -m venv venv
+# Windows: venv\Scripts\activate
+# Mac/Linux: source venv/bin/activate
 
-# Activate virtual environment
-# Windows:
-venv\Scripts\activate
-# Linux/macOS:
-source venv/bin/activate
-
-# Install dependencies
+# 2. Install dependencies
 pip install -r requirements.txt
 
-# (Optional) Seed realistic demo data
-python seed_demo_data.py
-
-# Run FastAPI server
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+# 3. Launch the application
+python run.py
 ```
+Your browser will automatically open to `http://localhost:8501`.
 
-### Frontend (React + Vite + Tailwind CSS)
-```bash
-# Navigate to frontend directory
-cd frontend
+---
 
-# Install packages
-npm install
+## 🔍 Why Did the Old Setup Show "No Connection"?
 
-# Start Vite development server
-npm run dev
-```
+In the previous project configuration:
+1. The frontend was built with Node.js/React/Vite (`port 5173`) and the backend was FastAPI (`port 8000`).
+2. The launcher script ran with hidden window mode (`-WindowStyle Hidden`) and silenced errors (`$ErrorActionPreference = "SilentlyContinue"`).
+3. If Node.js wasn't installed, npm failed, or dependencies were missing, both servers silently crashed in the background.
+4. When Microsoft Edge was opened to `http://localhost:5173`, nothing was listening on that port, resulting in the **"Can't reach this page / connection refused"** error.
+
+### How the New Version Fixes This:
+- **Single Runtime:** Everything is 100% Python. There is no second server, no Node.js requirement, and no port mismatch.
+- **Self-Healing Launcher:** `run.bat` and `run.sh` detect your Python environment, auto-create the virtual environment, install any missing dependencies, and launch the app in one smooth operation.
+- **Visible Diagnostic Output:** If an issue ever occurs, the launcher displays clear, readable messages instead of silently vanishing.
 
 ---
 
@@ -81,37 +87,22 @@ npm run dev
 
 Configure storage paths via the `.env` file in the root directory:
 ```ini
-# Primary SQLite Database Path
+# Primary SQLite Database Path (default: D:\finance\finance.db)
 DB_PATH=D:\finance\finance.db
 
-# Automatic Backups Directory
+# Automatic Backups Directory (default: D:\finance\backups)
 BACKUP_DIR=D:\finance\backups
 
-# Maximum backups retained
+# Maximum backups retained (default: 30)
 MAX_BACKUPS=30
-
-# Server Bind Settings
-HOST=0.0.0.0
-PORT=8000
 ```
-*Note: If `D:\finance\` cannot be accessed (e.g. machine without a D: drive), the application gracefully falls back to a local `data/` directory.*
+*Note: If `D:\finance\` cannot be accessed (e.g. on a computer without a D: drive or on macOS/Linux), the application gracefully falls back to `./data/finance.db`.*
 
 ---
 
-## 📊 Data Model & Account Types
+## 🧪 Testing
 
-1. **`accounts`**: `id`, `name`, `type` (`CASH` | `BROKERAGE` | `CREDIT`), `institution`, `is_active`, `created_at`
-2. **`balance_snapshots`**: `id`, `account_id`, `as_of_date` (YYYY-MM-DD), `balance` (stored as negative for `CREDIT`), `note`
-3. **`brokerage_holdings`**: `id`, `account_id`, `as_of_date` (YYYY-MM-DD), `asset_type` (`EQUITY` | `CASH`), `ticker`, `shares`
-4. **`ticker_prices`**: `ticker`, `date` (YYYY-MM-DD), `close_price` (cached from `yfinance`; `CASH` is always `1.0`)
-5. **`transactions`**: `id`, `account_id`, `date`, `merchant`, `amount`, `category`, `is_transfer`, `note`
-
----
-
-## 🐧 Later Linux VM / Docker Hosting
-
-The frontend Vite config proxies `/api` to the backend and binds to `0.0.0.0`. To deploy on a Linux VM:
-1. Copy or clone the repository to your Linux server.
-2. In `.env`, set `DB_PATH=/var/finance/finance.db` and `BACKUP_DIR=/var/finance/backups`.
-3. Build the frontend (`npm run build`) and serve static files with Nginx or Caddy, reverse-proxying `/api` to Uvicorn running on port 8000.
-4. Access via your mobile device or desktop browser over your local network or Wireguard/Tailscale VPN.
+To run the comprehensive test suite verifying the database, WAL mode, time-series calculations, attribution reconciliation, and CSV imports:
+```bash
+python backend/test_app.py
+```

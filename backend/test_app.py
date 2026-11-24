@@ -155,9 +155,14 @@ def test_brokerage_account_detail():
 
 def test_transactions_and_csv_import():
     print("[Test] Testing Transactions API & CSV statement import...")
-    with get_db(is_write=False) as conn:
+    with get_db(is_write=True) as conn:
         acc = conn.execute("SELECT id FROM accounts LIMIT 1").fetchone()
-    acc_id = acc["id"]
+        if not acc:
+            cur = conn.cursor()
+            cur.execute("INSERT INTO accounts (name, type, institution, is_active, created_at) VALUES ('Test Account', 'CASH', 'Test Bank', 1, '2026-01-01')")
+            acc_id = cur.lastrowid
+        else:
+            acc_id = acc["id"]
 
     # Create transaction
     tx_payload = {
@@ -198,6 +203,7 @@ if __name__ == "__main__":
     print("\n==================================================")
     print("  SIMPLIFI LOCAL - COMPREHENSIVE TEST SUITE")
     print("==================================================\n")
+    init_db()
     test_health()
     test_database_wal_mode()
     test_backup_service()

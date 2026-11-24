@@ -1,3 +1,5 @@
 @echo off
 title Finance Tracker
-powershell -ExecutionPolicy Bypass -WindowStyle Hidden -File "%~dp0run_desktop.ps1"
+set SCRIPT_DIR=%~dp0
+cd /d "%SCRIPT_DIR%"
+call "%SCRIPT_DIR%run.bat"
