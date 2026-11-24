@@ -45,12 +45,15 @@ def main():
 
     try:
         from streamlit.web import cli as stcli
+        # On Linux server, default to headless=true so it doesn't fail trying to open a desktop browser
+        is_headless = "true" if sys.platform.startswith("linux") else "false"
         sys.argv = [
             "streamlit",
             "run",
             str(FRONTEND_APP),
+            "--server.address=0.0.0.0",
             "--server.port=8501",
-            "--server.headless=false",
+            f"--server.headless={is_headless}",
             "--browser.gatherUsageStats=false",
             "--theme.base=light",
             "--theme.primaryColor=#0d9488",
