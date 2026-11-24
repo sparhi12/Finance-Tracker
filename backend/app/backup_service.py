@@ -92,3 +92,34 @@ def list_backups() -> List[Dict]:
             "created_at": datetime.fromtimestamp(stat.st_mtime).isoformat()
         })
     return result
+
+def restore_backup(backup_path: str) -> bool:
+    """
+    Safely restores DB_PATH from a chosen backup snapshot file.
+    """
+    source = Path(backup_path)
+    if not source.exists():
+        return False
+    try:
+        # Create a safety backup of current state before overwrite
+        create_backup(force=True)
+
+        # Remove WAL and SHM journal files
+        wal_file = Path(str(DB_PATH) + "-wal")
+        shm_file = Path(str(DB_PATH) + "-shm")
+        if wal_file.exists():
+            wal_file.unlink()
+        if shm_file.exists():
+            shm_file.unlink()
+
+        # Copy snapshot to DB_PATH
+        shutil.copy2(str(source), str(DB_PATH))
+
+        # Reconnect and ensure WAL mode
+        conn = sqlite3.connect(str(DB_PATH), timeout=10.0)
+        conn.execute("PRAGMA journal_mode = WAL;")
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"[Restore Error] Failed to restore from {backup_path}: {e}")
+        return False

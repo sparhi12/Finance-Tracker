@@ -10,7 +10,10 @@ from app.config import DB_PATH, BACKUP_DIR, MAX_BACKUPS
 from app.database import get_db, init_db
 from app.backup_service import create_backup, list_backups, restore_backup
 from app.price_service import ensure_cash_price
-from backend.seed_demo_data import seed_demo_data
+try:
+    from backend.seed_demo_data import seed_demo_data
+except ImportError:
+    from seed_demo_data import seed_demo_data
 from frontend.utils.formatters import format_currency
 
 def render_backups():
